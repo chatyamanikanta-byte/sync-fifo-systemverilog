@@ -1,0 +1,44 @@
+
+****** xsim v2022.2 (64-bit)
+  **** SW Build 3671981 on Fri Oct 14 04:59:54 MDT 2022
+  **** IP Build 3669848 on Fri Oct 14 08:30:02 MDT 2022
+    ** Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.
+
+source xsim.dir/fifo_regression_sim/xsim_script.tcl
+# xsim {fifo_regression_sim} -autoloadwcfg -tclbatch {run_fifo.tcl} -sv_seed 184
+Time resolution is 1 ps
+source run_fifo.tcl
+## log_wave /tb_sync_fifo/dut/*
+## run all
+TEST: reset and empty read
+TEST: single write/read and output hold
+TEST: fill, reject overflow, and drain
+TEST: simultaneous requests while empty
+TEST: simultaneous requests while full
+TEST: simultaneous requests while partially filled
+TEST: repeated pointer wraparound
+TEST: reset with queued data and requests asserted
+TEST: operation after reset
+TEST: 500 randomized transaction cycles
+TEST: drain remaining reference data
+COVERAGE: pre-transaction occupancy
+  occupancy 0: 81 hits
+  occupancy 1: 135 hits
+  occupancy 2: 115 hits
+  occupancy 3: 108 hits
+  occupancy 4: 59 hits
+  occupancy 5: 31 hits
+  occupancy 6: 23 hits
+  occupancy 7: 27 hits
+  occupancy 8: 8 hits
+COVERAGE: requests {write, read}
+  request combination 00: 117 hits
+  request combination 01: 176 hits
+  request combination 10: 169 hits
+  request combination 11: 125 hits
+COVERAGE: simultaneous empty=23 full=1 middle=101
+COVERAGE: reset while nonempty=13
+PASS: synchronous FIFO passed 602 checked cycles.
+$finish called at time : 6027 ns : File "/home/cmandapall_588fa26/hardware-prep/01_sync_fifo/tb/tb_sync_fifo.sv" Line 241
+## quit
+INFO: [Common 17-206] Exiting xsim at Sun Nov  1 18:42:18 2026...

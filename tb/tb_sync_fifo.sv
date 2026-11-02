@@ -18,6 +18,14 @@ module tb_sync_fifo;
 
     int checks = 0;
 
+    // Explicit functional coverage counters.
+    int occupancy_hits [0:8] = '{default:0};
+    int request_hits [0:3] = '{default:0};
+    int simultaneous_empty_hits = 0;
+    int simultaneous_full_hits = 0;
+    int simultaneous_middle_hits = 0;
+    int reset_nonempty_hits = 0;
+
     sync_fifo dut (
         .clk     (clk),
         .rst     (rst),
@@ -49,8 +57,7 @@ module tb_sync_fifo;
         rd_en   = read_request;
         wr_data = data;
 
-        // Determine acceptance using the reference model's
-        // occupancy BEFORE this transaction.
+        // Acceptance uses occupancy before this transaction.
         accept_write = write_request &&
                        (model_queue.size() < 8);
         accept_read  = read_request &&
@@ -58,11 +65,29 @@ module tb_sync_fifo;
 
         @(posedge clk);
 
+        // Sample coverage before updating the reference queue.
+        if (reset_request) begin
+            if (model_queue.size() > 0)
+                reset_nonempty_hits++;
+        end else begin
+            occupancy_hits[model_queue.size()]++;
+            request_hits[{write_request, read_request}]++;
+
+            if (write_request && read_request) begin
+                if (model_queue.size() == 0)
+                    simultaneous_empty_hits++;
+                else if (model_queue.size() == 8)
+                    simultaneous_full_hits++;
+                else
+                    simultaneous_middle_hits++;
+            end
+        end
+
         if (reset_request) begin
             model_queue.delete();
             expected_rd_data = 8'd0;
         end else begin
-            // Pop first: a simultaneous read returns old FIFO data.
+            // Pop first: simultaneous read returns old FIFO data.
             if (accept_read)
                 expected_rd_data = model_queue.pop_front();
 
@@ -70,7 +95,7 @@ module tb_sync_fifo;
                 model_queue.push_back(data);
         end
 
-        // Allow the DUT's nonblocking assignments to settle.
+        // Allow nonblocking assignments to settle.
         #1;
 
         expected_count = model_queue.size();
@@ -155,12 +180,11 @@ module tb_sync_fifo;
         step(1, 1, 1, 8'hFF);
         step(0, 0, 1, 8'h00);
 
-             $display("TEST: operation after reset");
+        $display("TEST: operation after reset");
         step(0, 1, 0, 8'h5A);
         step(0, 0, 1, 8'h00);
 
         $display("TEST: 500 randomized transaction cycles");
-
         for (int i = 0; i < 500; i++) begin
             step(
                 ($urandom_range(0, 49) == 0),
@@ -171,11 +195,46 @@ module tb_sync_fifo;
         end
 
         $display("TEST: drain remaining reference data");
-
         while (model_queue.size() > 0)
             step(0, 0, 1, 8'h00);
 
         step(0, 0, 1, 8'h00);
+
+        // Let the final cycle's assertion process finish.
+        #1;
+
+        $display("COVERAGE: pre-transaction occupancy");
+        for (int i = 0; i <= 8; i++) begin
+            $display("  occupancy %0d: %0d hits",
+                     i, occupancy_hits[i]);
+
+            if (occupancy_hits[i] == 0)
+                $fatal(1, "COVERAGE GAP: occupancy %0d", i);
+        end
+
+        $display("COVERAGE: requests {write, read}");
+        for (int i = 0; i < 4; i++) begin
+            $display("  request combination %02b: %0d hits",
+                     i[1:0], request_hits[i]);
+
+            if (request_hits[i] == 0)
+                $fatal(1, "COVERAGE GAP: request combination %02b",
+                       i[1:0]);
+        end
+
+        $display("COVERAGE: simultaneous empty=%0d full=%0d middle=%0d",
+                 simultaneous_empty_hits,
+                 simultaneous_full_hits,
+                 simultaneous_middle_hits);
+
+        $display("COVERAGE: reset while nonempty=%0d",
+                 reset_nonempty_hits);
+
+        if ((simultaneous_empty_hits == 0) ||
+            (simultaneous_full_hits == 0) ||
+            (simultaneous_middle_hits == 0) ||
+            (reset_nonempty_hits == 0))
+            $fatal(1, "COVERAGE GAP: required corner case missing");
 
         $display("PASS: synchronous FIFO passed %0d checked cycles.",
                  checks);
@@ -187,6 +246,7 @@ module tb_sync_fifo;
         #10000;
         $fatal(1, "FAIL: simulation timeout");
     end
+
     // Immediate assertions: sample before the edge update,
     // then check after nonblocking assignments have settled.
     always @(posedge clk) begin : fifo_assertions
@@ -203,7 +263,6 @@ module tb_sync_fifo;
         old_wr_ptr = dut.wr_ptr;
         old_rd_ptr = dut.rd_ptr;
 
-        // Derive acceptance from the specified boundary rules.
         accepted_write = wr_en && (count < 4'd8);
         accepted_read  = rd_en && (count > 4'd0);
 
@@ -251,4 +310,5 @@ module tb_sync_fifo;
                 else $fatal(1, "ASSERT: reset did not clear read output");
         end
     end
+
 endmodule
