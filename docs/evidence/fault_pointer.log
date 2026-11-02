@@ -1,0 +1,25 @@
+#-----------------------------------------------------------
+# xsim v2022.2 (64-bit)
+# SW Build 3671981 on Fri Oct 14 04:59:54 MDT 2022
+# IP Build 3669848 on Fri Oct 14 08:30:02 MDT 2022
+# Start of session at: Sun Nov  1 18:25:01 2026
+# Process ID: 68700
+# Current directory: /home/cmandapall_588fa26/hardware-prep/01_sync_fifo/fault_test
+# Command line: xsim -log fault_pointer.log -mode tcl -source {xsim.dir/fifo_fault_sim/xsim_script.tcl}
+# Log file: /home/cmandapall_588fa26/hardware-prep/01_sync_fifo/fault_test/fault_pointer.log
+# Journal file: /home/cmandapall_588fa26/hardware-prep/01_sync_fifo/fault_test/xsim.jou
+# Running On: hunmin.ece.iit.edu, OS: Linux, CPU Frequency: 2599.841 MHz, CPU Physical cores: 24, Host memory: 404154 MB
+#-----------------------------------------------------------
+source xsim.dir/fifo_fault_sim/xsim_script.tcl
+# xsim {fifo_fault_sim} -autoloadwcfg -tclbatch {../sim/run_fifo.tcl} -sv_seed 184
+Time resolution is 1 ps
+source ../sim/run_fifo.tcl
+## log_wave /tb_sync_fifo/dut/*
+## run all
+TEST: reset and empty read
+TEST: single write/read and output hold
+Fatal: ASSERT: incorrect write pointer update
+Time: 36 ns  Iteration: 0  Process: /tb_sync_fifo/Always192_12  Scope: tb_sync_fifo.fifo_assertions.a_write_pointer  File: /home/cmandapall_588fa26/hardware-prep/01_sync_fifo/tb/tb_sync_fifo.sv Line: 242
+$finish called at time : 36 ns
+## quit
+INFO: [Common 17-206] Exiting xsim at Sun Nov  1 18:25:05 2026...

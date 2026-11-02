@@ -1,0 +1,14 @@
+# Generated simulation files
+sim/*
+!sim/run_smoke.tcl
+!sim/run_fifo.tcl
+
+# Keep only the intentional faulty source
+fault_test/*
+!fault_test/sync_fifo_fault.sv
+
+# Editor and Python temporary files
+*~
+*.swp
+__pycache__/
+rtl/sync_fifo.svO
