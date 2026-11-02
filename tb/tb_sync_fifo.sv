@@ -26,6 +26,12 @@ module tb_sync_fifo;
     int simultaneous_middle_hits = 0;
     int reset_nonempty_hits = 0;
 
+    // Cross coverage: pre-transaction occupancy x {write, read}.
+    int occupancy_request_hits [0:8][0:3] =
+        '{default:'{default:0}};
+
+    int cross_bins_hit = 0;
+
     sync_fifo dut (
         .clk     (clk),
         .rst     (rst),
@@ -60,8 +66,8 @@ module tb_sync_fifo;
         // Acceptance uses occupancy before this transaction.
         accept_write = write_request &&
                        (model_queue.size() < 8);
-        accept_read  = read_request &&
-                       (model_queue.size() > 0);
+        accept_read = read_request &&
+                      (model_queue.size() > 0);
 
         @(posedge clk);
 
@@ -72,6 +78,9 @@ module tb_sync_fifo;
         end else begin
             occupancy_hits[model_queue.size()]++;
             request_hits[{write_request, read_request}]++;
+
+            occupancy_request_hits[model_queue.size()]
+                                  [{write_request, read_request}]++;
 
             if (write_request && read_request) begin
                 if (model_queue.size() == 0)
@@ -184,6 +193,25 @@ module tb_sync_fifo;
         step(0, 1, 0, 8'h5A);
         step(0, 0, 1, 8'h00);
 
+        $display("TEST: deterministic occupancy/request sweep");
+
+        for (int occ = 0; occ <= 8; occ++) begin
+            for (int req = 0; req < 4; req++) begin
+                // Start each case from a known empty FIFO.
+                step(1, 0, 0, 8'h00);
+
+                // Establish the required pre-transaction occupancy.
+                for (int entry_idx = 0; entry_idx < occ; entry_idx++)
+                    step(0, 1, 0, 8'h40 + entry_idx);
+
+                // req[1] = write request; req[0] = read request.
+                step(0, req[1], req[0], 8'hA5);
+            end
+        end
+
+        // Restore an empty FIFO before randomized traffic.
+        step(1, 0, 0, 8'h00);
+
         $display("TEST: 500 randomized transaction cycles");
         for (int i = 0; i < 500; i++) begin
             step(
@@ -236,6 +264,28 @@ module tb_sync_fifo;
             (reset_nonempty_hits == 0))
             $fatal(1, "COVERAGE GAP: required corner case missing");
 
+        // Report and enforce all 36 occupancy/request bins.
+        $display("COVERAGE: occupancy x requests {write, read}");
+        cross_bins_hit = 0;
+
+        for (int occ = 0; occ <= 8; occ++) begin
+            for (int req = 0; req < 4; req++) begin
+                $display("  occupancy=%0d requests=%02b hits=%0d",
+                         occ, req[1:0],
+                         occupancy_request_hits[occ][req]);
+
+                if (occupancy_request_hits[occ][req] > 0)
+                    cross_bins_hit++;
+            end
+        end
+
+        $display("COVERAGE: cross bins hit=%0d/36",
+                 cross_bins_hit);
+
+        if (cross_bins_hit != 36)
+            $fatal(1, "COVERAGE GAP: only %0d/36 cross bins hit",
+                   cross_bins_hit);
+
         $display("PASS: synchronous FIFO passed %0d checked cycles.",
                  checks);
         $finish;
@@ -247,8 +297,7 @@ module tb_sync_fifo;
         $fatal(1, "FAIL: simulation timeout");
     end
 
-    // Immediate assertions: sample before the edge update,
-    // then check after nonblocking assignments have settled.
+    // Sample before the DUT update, then check after it settles.
     always @(posedge clk) begin : fifo_assertions
         logic sampled_reset;
         logic accepted_write;

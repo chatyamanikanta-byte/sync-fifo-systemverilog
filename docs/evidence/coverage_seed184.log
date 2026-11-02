@@ -19,26 +19,65 @@ TEST: simultaneous requests while partially filled
 TEST: repeated pointer wraparound
 TEST: reset with queued data and requests asserted
 TEST: operation after reset
+TEST: deterministic occupancy/request sweep
 TEST: 500 randomized transaction cycles
 TEST: drain remaining reference data
 COVERAGE: pre-transaction occupancy
-  occupancy 0: 81 hits
-  occupancy 1: 135 hits
-  occupancy 2: 115 hits
-  occupancy 3: 108 hits
-  occupancy 4: 59 hits
-  occupancy 5: 31 hits
-  occupancy 6: 23 hits
-  occupancy 7: 27 hits
-  occupancy 8: 8 hits
+  occupancy 0: 117 hits
+  occupancy 1: 167 hits
+  occupancy 2: 143 hits
+  occupancy 3: 132 hits
+  occupancy 4: 79 hits
+  occupancy 5: 47 hits
+  occupancy 6: 35 hits
+  occupancy 7: 35 hits
+  occupancy 8: 12 hits
 COVERAGE: requests {write, read}
-  request combination 00: 117 hits
-  request combination 01: 176 hits
-  request combination 10: 169 hits
-  request combination 11: 125 hits
-COVERAGE: simultaneous empty=23 full=1 middle=101
-COVERAGE: reset while nonempty=13
-PASS: synchronous FIFO passed 602 checked cycles.
-$finish called at time : 6027 ns : File "/home/cmandapall_588fa26/hardware-prep/01_sync_fifo/tb/tb_sync_fifo.sv" Line 241
+  request combination 00: 126 hits
+  request combination 01: 185 hits
+  request combination 10: 322 hits
+  request combination 11: 134 hits
+COVERAGE: simultaneous empty=24 full=2 middle=108
+COVERAGE: reset while nonempty=46
+COVERAGE: occupancy x requests {write, read}
+  occupancy=0 requests=00 hits=14
+  occupancy=0 requests=01 hits=17
+  occupancy=0 requests=10 hits=62
+  occupancy=0 requests=11 hits=24
+  occupancy=1 requests=00 hits=29
+  occupancy=1 requests=01 hits=40
+  occupancy=1 requests=10 hits=66
+  occupancy=1 requests=11 hits=32
+  occupancy=2 requests=00 hits=20
+  occupancy=2 requests=01 hits=30
+  occupancy=2 requests=10 hits=61
+  occupancy=2 requests=11 hits=32
+  occupancy=3 requests=00 hits=32
+  occupancy=3 requests=01 hits=32
+  occupancy=3 requests=10 hits=46
+  occupancy=3 requests=11 hits=22
+  occupancy=4 requests=00 hits=12
+  occupancy=4 requests=01 hits=25
+  occupancy=4 requests=10 hits=27
+  occupancy=4 requests=11 hits=15
+  occupancy=5 requests=00 hits=8
+  occupancy=5 requests=01 hits=10
+  occupancy=5 requests=10 hits=26
+  occupancy=5 requests=11 hits=3
+  occupancy=6 requests=00 hits=1
+  occupancy=6 requests=01 hits=13
+  occupancy=6 requests=10 hits=20
+  occupancy=6 requests=11 hits=1
+  occupancy=7 requests=00 hits=9
+  occupancy=7 requests=01 hits=11
+  occupancy=7 requests=10 hits=12
+  occupancy=7 requests=11 hits=3
+  occupancy=8 requests=00 hits=1
+  occupancy=8 requests=01 hits=7
+  occupancy=8 requests=10 hits=2
+  occupancy=8 requests=11 hits=2
+COVERAGE: cross bins hit=36/36
+PASS: synchronous FIFO passed 819 checked cycles.
+$finish called at time : 8197 ns : File "/home/cmandapall_588fa26/hardware-prep/01_sync_fifo/tb/tb_sync_fifo.sv" Line 291
 ## quit
-INFO: [Common 17-206] Exiting xsim at Sun Nov  1 18:42:18 2026...
+INFO: [Common 17-206] Exiting xsim at Sun Nov  1 19:36:22 2026...
