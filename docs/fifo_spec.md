@@ -1,6 +1,6 @@
 | Feature | Behavior |
 |---|---|
-| Data width / depth | 8 bits / 8 entries |
+| Data width / depth | Positive `DATA_WIDTH` and `DEPTH` parameters (default 8 bits / 8 entries) |
 | Clock | All operations occur on the rising edge |
 | Reset | Synchronous, active high; clears pointers, count and output |
 | Write accepted | `wr_en && !full` |

@@ -1,7 +1,8 @@
 # Synchronous FIFO
 
-Handwritten SystemVerilog FIFO: 8-bit data, eight entries,
-single clock, synchronous active-high reset, registered read output.
+SystemVerilog FIFO with configurable positive `DATA_WIDTH` and `DEPTH`
+parameters. The defaults are 8-bit data and eight entries. The FIFO uses a
+single clock, synchronous active-high reset, and a registered read output.
 
 ## Boundary behavior
 
@@ -11,28 +12,56 @@ single clock, synchronous active-high reset, registered read output.
 - Simultaneous requests while full accept only the read.
 - Simultaneous requests at intermediate occupancy accept both.
 
+Operations use the occupancy before the rising edge. Read data updates
+after an accepted read, clears on reset, and otherwise holds its value.
+Each pointer wraps from address `DEPTH - 1` to zero.
+
 ## Run on hunmin
 
-Load Vivado in tcsh:
+From the repository root, load Vivado Simulator 2022.2 in tcsh and
+run the three-configuration regression with Python 3:
 
 ```tcsh
 source /apps/Xilinx/Vivado/2022.2/settings64.csh
-python3 run_regression.py
+python3 run_regression.py --matrix
 ```
 
-Requires Python 3 and Vivado Simulator 2022.2.
+Use `python3 run_regression.py` for the default configuration only.
 
-## Verification evidence
+| Data width | Depth | Required occupancy × request bins | Logs under `sim/regression_logs/` |
+|---:|---:|---:|---|
+| 8 | 8 | 36 | `.` |
+| 1 | 1 | 8 | `depth1/` |
+| 16 | 5 | 24 | `depth5/` |
 
-- Independent queue scoreboard checks data, occupancy and flags.
-- Immediate assertions check occupancy, pointer updates and reset output.
-- Five random seeds passed: 1, 42, 184, 2026, 9999.
-- Total: 3,016 checked cycles across the five runs.
-- Intentional write-pointer fault detected at 36 ns.
+Each configuration runs a queue scoreboard, occupancy and pointer
+assertions, directed tests, and 500 randomized transactions per seed.
+A deterministic sweep exercises every combination of pre-transaction
+occupancy and read/write requests. Each seed must hit all applicable
+bins before reporting PASS. Each log directory contains a `summary.csv`.
 
-Each seed repeats the directed suite before 500 randomized cycles.
-These results are simulation evidence; functional coverage and FPGA
-implementation are not yet completed.
+## Parameterized simulation results
 
-The intentionally faulty RTL is isolated in fault_test and excluded
-from the normal regression.
+Verilator 5.48 ran the same SystemVerilog testbench with assertions
+enabled for seeds 1, 42, 184, 2026, and 9999.
+
+| Data width | Depth | Seeds passed | Checked cycles | Cross bins per seed |
+|---:|---:|---:|---:|---:|
+| 1 | 1 | 5/5 | 2,738 | 8/8 |
+| 16 | 5 | 5/5 | 3,405 | 24/24 |
+| 8 | 8 | 5/5 | 4,099 | 36/36 |
+
+The parameterized matrix is pending on Vivado Simulator 2022.2.
+
+## Historical baseline evidence
+
+The fixed 8-bit, eight-entry FIFO at commit `3ca7048` passed all five
+XSim seeds (1, 42, 184, 2026, 9999) for **4,101 checked cycles** and
+**36/36 cross-coverage bins** in every seed.
+
+- [Regression summary](docs/evidence/regression_summary.csv)
+- [Coverage log for seed 184](docs/evidence/coverage_seed184.log)
+- [Write-pointer fault analysis](docs/debug_pointer_fault.md)
+
+The isolated write-pointer fault was detected at 36 ns. The faulty RTL
+lives in `fault_test/` and is excluded from the normal regression.
