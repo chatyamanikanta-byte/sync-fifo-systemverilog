@@ -104,5 +104,6 @@ The self-checking testbench covers idle, both single-request cases,
 sustained contention, a new request arriving during a stall, resumption
 after a stall, and reset during a stall.
 
-The directed regression passed in Verilator with **31 checked cycles**
-and **21 accepted transfers**. The arbiter XSim run is pending on hunmin.
+The directed regression passed in Verilator and Vivado Simulator 2022.2
+on hunmin, with **31 checked cycles** and **21 accepted transfers** in
+each simulator. The XSim run finished at 315 ns.
