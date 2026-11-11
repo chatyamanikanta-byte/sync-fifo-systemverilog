@@ -77,3 +77,32 @@ XSim seeds (1, 42, 184, 2026, 9999) for **4,101 checked cycles** and
 
 The isolated write-pointer fault was detected at 36 ns. The faulty RTL
 lives in `fault_test/` and is excluded from the normal regression.
+
+## Two-requester round-robin arbiter
+
+`rtl/round_robin_arbiter.sv` selects one of two requests with a one-hot
+`grant`. The downstream interface accepts the selected request at a
+rising edge when `ready` is high and a grant is asserted. Requesters
+hold their requests and payloads until accepted. A stalled grant holds
+its selection until acceptance or reset. Each accepted transfer gives
+the other requester priority on the next arbitration.
+
+Active-high reset suppresses grants and synchronously clears the held
+selection. Requester 0 gets priority on the first tie after reset.
+The arbiter supplies the selection. The caller uses it to select payloads.
+
+From the repository root, with Vivado Simulator 2022.2 loaded:
+
+```bash
+cd sim
+xvlog --sv ../rtl/round_robin_arbiter.sv ../tb/tb_round_robin_arbiter.sv
+xelab tb_round_robin_arbiter -s arbiter_sim
+xsim arbiter_sim -runall
+```
+
+The self-checking testbench covers idle, both single-request cases,
+sustained contention, a new request arriving during a stall, resumption
+after a stall, and reset during a stall.
+
+The directed regression passed in Verilator with **31 checked cycles**
+and **21 accepted transfers**. The arbiter XSim run is pending on hunmin.
