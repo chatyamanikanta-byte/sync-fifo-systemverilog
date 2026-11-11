@@ -51,7 +51,19 @@ enabled for seeds 1, 42, 184, 2026, and 9999.
 | 16 | 5 | 5/5 | 3,405 | 24/24 |
 | 8 | 8 | 5/5 | 4,099 | 36/36 |
 
-The parameterized matrix is pending on Vivado Simulator 2022.2.
+### Vivado Simulator 2022.2 on hunmin
+
+The same five seeds passed in XSim for each configuration.
+
+| Data width | Depth | Seeds passed | Checked cycles | Cross bins per seed |
+|---:|---:|---:|---:|---:|
+| 1 | 1 | 5/5 | 2,737 | 8/8 |
+| 16 | 5 | 5/5 | 3,397 | 24/24 |
+| 8 | 8 | 5/5 | 4,092 | 36/36 |
+| | **Total** | **15/15** | **10,226** | |
+
+A passing run requires all applicable cross-coverage bins, along with
+passing scoreboard and assertion checks.
 
 ## Historical baseline evidence
 
