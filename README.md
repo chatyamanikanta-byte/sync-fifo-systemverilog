@@ -107,3 +107,26 @@ after a stall, and reset during a stall.
 The directed regression passed in Verilator and Vivado Simulator 2022.2
 on hunmin, with **31 checked cycles** and **21 accepted transfers** in
 each simulator. The XSim run finished at 315 ns.
+
+## Ready/valid skid buffer
+
+`rtl/ready_valid_skid_buffer.sv` uses one storage slot and a bypass
+path. When empty, it accepts an input beat and presents it at the
+output in the same cycle. If downstream stalls, it saves the beat and
+holds it at the output until delivery. The input stays backpressured
+while the slot is full, including the edge that drains the slot.
+Active-high reset suppresses handshakes and clears the slot on the
+rising edge. The data width defaults to 8 bits and is configurable.
+
+The directed test passed in Icarus Verilog using 16-bit data. It checked
+14 cycles, accepted 6 beats, and delivered 5 beats. Reset flushed the
+remaining beat.
+
+From the repository root, with Vivado Simulator 2022.2 loaded:
+
+```bash
+cd sim
+xvlog --sv ../rtl/ready_valid_skid_buffer.sv ../tb/tb_ready_valid_skid_buffer.sv
+xelab tb_ready_valid_skid_buffer -s skid_buffer_sim
+xsim skid_buffer_sim -runall
+```
