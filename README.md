@@ -118,9 +118,10 @@ while the slot is full, including the edge that drains the slot.
 Active-high reset suppresses handshakes and clears the slot on the
 rising edge. The data width defaults to 8 bits and is configurable.
 
-The directed test passed in Icarus Verilog using 16-bit data. It checked
-14 cycles, accepted 6 beats, and delivered 5 beats. Reset flushed the
-remaining beat.
+The directed test passed in Icarus Verilog and Vivado Simulator 2022.2
+on hunmin using 16-bit data. Each run checked 14 cycles, accepted 6 beats,
+and delivered 5 beats. Reset flushed the remaining beat. The XSim run
+finished at 145 ns.
 
 From the repository root, with Vivado Simulator 2022.2 loaded:
 
