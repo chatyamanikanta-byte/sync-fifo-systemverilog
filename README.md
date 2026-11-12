@@ -166,8 +166,18 @@ beat is buffered, and verifies output stability across stalled edges.
 The test requires transfers from both sources, contention, and stalls.
 The directed test checks the grant order.
 
-In Icarus Verilog, seeds 1, 42, 184, 2026, and 9999 passed with
-10,040 checked cycles and 6,821 delivered beats in total.
+Seeds 1, 42, 184, 2026, and 9999 passed in Icarus Verilog and Vivado
+Simulator 2022.2 on hunmin. Both simulators produced the same per-seed
+results.
+
+| Seed | Checked cycles | Delivered beats | Contention cycles | Stall cycles |
+|---:|---:|---:|---:|---:|
+| 1 | 2,008 | 1,389 | 924 | 455 |
+| 42 | 2,008 | 1,369 | 941 | 467 |
+| 184 | 2,008 | 1,375 | 830 | 459 |
+| 2026 | 2,008 | 1,364 | 877 | 465 |
+| 9999 | 2,008 | 1,324 | 896 | 469 |
+| **Total per simulator** | **10,040** | **6,821** | **4,468** | **2,315** |
 
 From the repository root, with Vivado Simulator 2022.2 loaded:
 
