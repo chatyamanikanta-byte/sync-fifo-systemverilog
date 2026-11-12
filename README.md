@@ -156,3 +156,27 @@ xvlog --sv ../rtl/round_robin_arbiter.sv ../rtl/ready_valid_skid_buffer.sv \
 xelab tb_ready_valid_stream_arbiter -s stream_arbiter_sim
 xsim stream_arbiter_sim -runall
 ```
+
+### Randomized integration regression
+
+Each seed runs 2,000 cycles of source traffic and downstream
+backpressure followed by eight drain cycles. The scoreboard compares
+accepted and delivered payloads in order, checks that at most one
+beat is buffered, and verifies output stability across stalled edges.
+The test requires transfers from both sources, contention, and stalls.
+The directed test checks the grant order.
+
+In Icarus Verilog, seeds 1, 42, 184, 2026, and 9999 passed with
+10,040 checked cycles and 6,821 delivered beats in total.
+
+From the repository root, with Vivado Simulator 2022.2 loaded:
+
+```bash
+cd sim
+xvlog --sv ../rtl/round_robin_arbiter.sv ../rtl/ready_valid_skid_buffer.sv \
+    ../rtl/ready_valid_stream_arbiter.sv ../tb/tb_ready_valid_stream_arbiter_random.sv &&
+xelab tb_ready_valid_stream_arbiter_random -s stream_arbiter_random_sim &&
+for seed in 1 42 184 2026 9999; do
+    xsim stream_arbiter_random_sim -testplusarg "seed=$seed" -runall || break
+done
+```
