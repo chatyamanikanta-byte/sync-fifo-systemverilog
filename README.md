@@ -141,9 +141,11 @@ priority when the skid buffer accepts the selected beat. A buffered
 beat stays at the output until the downstream transfer, and the next
 selected source waits while the buffer is full.
 
-The directed integration test passed in Icarus Verilog with 14 checked
-cycles and 8 delivered beats. It checks round-robin ordering, stable
-output during a stall, and a new request arriving while a grant is held.
+The directed integration test passed in Icarus Verilog and Vivado
+Simulator 2022.2 on hunmin. Each run checked 14 cycles and delivered
+8 beats. The XSim run finished at 145 ns. The test checks round-robin
+ordering, stable output during a stall, and a new request arriving
+while a grant is held.
 
 From the repository root, with Vivado Simulator 2022.2 loaded:
 
