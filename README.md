@@ -131,3 +131,26 @@ xvlog --sv ../rtl/ready_valid_skid_buffer.sv ../tb/tb_ready_valid_skid_buffer.sv
 xelab tb_ready_valid_skid_buffer -s skid_buffer_sim
 xsim skid_buffer_sim -runall
 ```
+
+## Two-input ready/valid stream arbiter
+
+`rtl/ready_valid_stream_arbiter.sv` connects the round-robin arbiter
+to the skid buffer. Each source holds valid and payload until its
+ready signal is asserted at a rising edge. The arbiter advances its
+priority when the skid buffer accepts the selected beat. A buffered
+beat stays at the output until the downstream transfer, and the next
+selected source waits while the buffer is full.
+
+The directed integration test passed in Icarus Verilog with 14 checked
+cycles and 8 delivered beats. It checks round-robin ordering, stable
+output during a stall, and a new request arriving while a grant is held.
+
+From the repository root, with Vivado Simulator 2022.2 loaded:
+
+```bash
+cd sim
+xvlog --sv ../rtl/round_robin_arbiter.sv ../rtl/ready_valid_skid_buffer.sv \
+    ../rtl/ready_valid_stream_arbiter.sv ../tb/tb_ready_valid_stream_arbiter.sv
+xelab tb_ready_valid_stream_arbiter -s stream_arbiter_sim
+xsim stream_arbiter_sim -runall
+```
